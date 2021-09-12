@@ -34,7 +34,7 @@ type VMConfig struct {
 func NewVM(config *VMConfig) *VM {
 	vm := &VM{
 		cfg:     config,
-		valueid: ValueGo + 1,
+		valueid: ValueNaN.ref + 1,
 		values:  make(map[Ref]*Value),
 	}
 	RegisterBuiltins(vm.cfg.Global)
@@ -43,32 +43,32 @@ func NewVM(config *VMConfig) *VM {
 }
 
 func (vm *VM) initDefaultValue() {
-	vm.values[ValueNaN] = valueNaN
-	vm.values[ValueZero] = valueZero
-	vm.values[ValueNull] = valueNull
-	vm.values[ValueTrue] = valueTrue
-	vm.values[ValueFalse] = valueFalse
-	vm.values[ValueMemory] = &Value{
-		name:  "Memory",
-		ref:   ValueMemory,
-		value: vm.cfg.Memory,
-	}
+	vm.values[ValueNaN.ref] = ValueNaN
+	vm.values[ValueZero.ref] = ValueZero
+	vm.values[ValueNull.ref] = ValueNull
+	vm.values[ValueTrue.ref] = ValueTrue
+	vm.values[ValueFalse.ref] = ValueFalse
+	// vm.values[ValueMemory] = &Value{
+	// 	name:  "Memory",
+	// 	ref:   ValueMemory,
+	// 	value: vm.cfg.Memory,
+	// }
 
 	goruntime := &Value{
 		name: "Go",
-		ref:  ValueGo,
+		ref:  ValueGo.ref,
 		value: map[string]interface{}{
 			"_makeFuncWrapper": func([]interface{}) interface{} {
 				return nil
 			},
 		},
 	}
-	vm.values[ValueGo] = goruntime
+	vm.values[ValueGo.ref] = goruntime
 	vm.cfg.Global.Register("Go", goruntime)
 
-	vm.values[ValueGlobal] = &Value{
+	vm.values[ValueGlobal.ref] = &Value{
 		name:  "Global",
-		ref:   ValueGlobal,
+		ref:   ValueGlobal.ref,
 		value: vm.cfg.Global,
 	}
 }
@@ -82,17 +82,17 @@ const (
 
 func floatValue(f float64) Ref {
 	if f != f {
-		return ValueNaN
+		return ValueNaN.ref
 	}
 	if f == 0 {
-		return ValueZero
+		return ValueZero.ref
 	}
 	return *(*Ref)(unsafe.Pointer(&f))
 }
 
 func (vm *VM) storeValue(name string, x interface{}) Ref {
 	if x == nil {
-		return ValueNull
+		return ValueNull.ref
 	}
 	switch xx := x.(type) {
 	case int8, int16, int32, int64, int:
@@ -103,9 +103,9 @@ func (vm *VM) storeValue(name string, x interface{}) Ref {
 		return floatValue(reflect.ValueOf(x).Float())
 	case bool:
 		if xx {
-			return ValueTrue
+			return ValueTrue.ref
 		}
-		return ValueFalse
+		return ValueFalse.ref
 	}
 
 	var tag int64
@@ -131,7 +131,7 @@ func (vm *VM) storeValue(name string, x interface{}) Ref {
 
 func (vm *VM) loadValue(ref Ref) (*Value, bool) {
 	if int64(ref) == 0 {
-		return valueUndefined, true
+		return &valueUndefined, true
 	}
 	n, ok := ref.Number()
 	if ok {

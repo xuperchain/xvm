@@ -64,6 +64,18 @@ func (r *resolver) resolveFunc(module, name string) (interface{}, bool) {
 		return (*Runtime).syscallJsCopyBytesToGo, true
 	case "go::syscall/js.copyBytesToJS": // for go1.13
 		return (*Runtime).syscallJsCopyBytesToJS, true
+
+	case "go::runtime.resetMemoryDataView":
+		return (*Runtime).resetMemoryDataView, true
+	case "go::runtime.nanotime1":
+		return (*Runtime).nanotime1, true
+	case "go::runtime.walltime1":
+		return (*Runtime).walltime1, true
+
+	case "go::syscall/js.finalizeRef":
+		return (*Runtime).finalizeRef, true
+	case "go::syscall/js.valueDelete":
+		return (*Runtime).syscallJsValueDelete, true
 	}
 	return nil, false
 }

@@ -1,12 +1,12 @@
 package gowasm
 
 import (
+	"github.com/xuperchain/xvm/runtime/go/js/fs"
 	"time"
 
 	"github.com/xuperchain/xvm/debug"
 	"github.com/xuperchain/xvm/exec"
 	"github.com/xuperchain/xvm/runtime/go/js"
-	"github.com/xuperchain/xvm/runtime/go/js/fs"
 )
 
 const (
@@ -60,8 +60,19 @@ func (rt *Runtime) nanotime() int64 {
 	return 1
 }
 
+func (rt *Runtime) nanotime1() int64 {
+	return 1
+}
+
 func (rt *Runtime) walltime() (int64, int32) {
 	return 0, 0
+}
+func (rt *Runtime) walltime1() (int64, int32) {
+	return 0, 0
+}
+
+func (rt *Runtime) finalizeRef(ref js.Ref) {
+
 }
 
 // Exited will be true if runtime.wasmExit has been called
@@ -94,6 +105,9 @@ func (rt *Runtime) getRandomData(r []byte) {
 func (rt *Runtime) debug(v int64) {
 }
 
+func (rt *Runtime) resetMemoryDataView() {
+}
+
 func (rt *Runtime) syscallJsValueGet(ref js.Ref, name string) (ret js.Ref) {
 	defer rt.jsvm.CatchException(&ret)
 	ret = rt.jsvm.Property(ref, name)
@@ -105,6 +119,8 @@ func (rt *Runtime) syscallJsValueSet(ref js.Ref, name string, value js.Ref) {
 	if ref == js.ValueGlobal {
 		rt.global.Register(name, value)
 	}
+}
+func (rt *Runtime) syscallJsValueDelete(ref js.Ref, name string) {
 }
 
 func (rt *Runtime) syscallJsValueNew(ref js.Ref, args []js.Ref) (ret js.Ref, ok bool) {

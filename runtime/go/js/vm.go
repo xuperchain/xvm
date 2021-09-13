@@ -71,6 +71,12 @@ func (vm *VM) initDefaultValue() {
 		ref:   ValueGlobal.ref,
 		value: vm.cfg.Global,
 	}
+	// for go1.13-
+	vm.values[0x7ff8000000000005] = &Value{
+		name:  "Global",
+		ref:   ValueGlobal.ref,
+		value: vm.cfg.Global,
+	}
 }
 
 const (

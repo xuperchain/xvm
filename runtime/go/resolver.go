@@ -30,7 +30,7 @@ func (r *resolver) resolveFunc(module, name string) (interface{}, bool) {
 		return (*Runtime).getRandomData, true
 	case "go::runtime.scheduleCallback": // for go.11
 		return (*Runtime).scheduleCallback, true
-	case "go::runtime.clearScheduledCallback": // for go.11
+	case "go::runtime.clearScheduledCallback": // for go.`11`
 		return (*Runtime).clearScheduledCallback, true
 	case "go::runtime.scheduleTimeoutEvent":
 		return (*Runtime).scheduleCallback, true

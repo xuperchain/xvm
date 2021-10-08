@@ -34,6 +34,25 @@ var (
 	ValueGo        = predefValue(6, typeFlagObject) // instance of the Go class in JavaScript
 )
 
+const (
+	// ValueNaN is the ref of Nan
+	ValueNaN2 Ref = nanHead<<32 | iota
+	// ValueZero is the ref of number 0
+	ValueZero2
+	// ValueNull is the ref of Null
+	ValueNull2
+	// ValueTrue is the ref of True
+	ValueTrue2
+	// ValueFalse is the ref of False
+	ValueFalse2
+	// ValueGlobal is the ref of global
+	ValueGlobal2
+	// ValueMemory is the ref of wasm Memory object
+	ValueMemory2
+	// ValueGo is the ref of Go object
+	ValueGo2
+)
+
 func predefValue(id uint32, typeFlag byte) *Value {
 	return &Value{ref: (nanHead|Ref(typeFlag))<<32 | Ref(id)}
 }

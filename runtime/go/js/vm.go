@@ -48,11 +48,6 @@ func (vm *VM) initDefaultValue() {
 	vm.values[ValueNull.ref] = ValueNull
 	vm.values[ValueTrue.ref] = ValueTrue
 	vm.values[ValueFalse.ref] = ValueFalse
-	// vm.values[ValueMemory] = &Value{
-	// 	name:  "Memory",
-	// 	ref:   ValueMemory,
-	// 	value: vm.cfg.Memory,
-	// }
 
 	goruntime := &Value{
 		name: "Go",
@@ -71,10 +66,41 @@ func (vm *VM) initDefaultValue() {
 		ref:   ValueGlobal.ref,
 		value: vm.cfg.Global,
 	}
-	// for go1.13-
-	vm.values[0x7ff8000000000005] = &Value{
+
+	// for go1.12-
+	vm.values[ValueNaN2] = &Value{
+		name:  "",
+		value: nil,
+		ref:   ValueNaN2,
+	}
+	vm.values[ValueZero2] = &Value{
+		name:  "",
+		value: nil,
+		ref:   ValueZero2,
+	}
+	vm.values[ValueNull2] = &Value{
+		name:  "",
+		value: nil,
+		ref:   ValueNull2,
+	}
+	vm.values[ValueTrue2] = &Value{
+		name:  "",
+		value: nil,
+		ref:   ValueTrue2,
+	}
+	vm.values[ValueFalse2] = &Value{
+		name:  "",
+		value: nil,
+		ref:   ValueFalse2,
+	}
+	vm.values[ValueMemory2] = &Value{
+		name:  "Memory",
+		ref:   ValueMemory2,
+		value: vm.cfg.Memory,
+	}
+	vm.values[ValueGlobal2] = &Value{
 		name:  "Global",
-		ref:   ValueGlobal.ref,
+		ref:   ValueGlobal2,
 		value: vm.cfg.Global,
 	}
 }

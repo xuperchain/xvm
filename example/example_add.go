@@ -46,7 +46,7 @@ func ExampleAdd() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	code, err := exec.NewAOTCode(modulePath,nil)
+	code, err := exec.NewAOTCode(modulePath, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

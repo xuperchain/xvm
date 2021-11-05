@@ -10,7 +10,6 @@ import (
 
 	"github.com/xuperchain/xvm/compile"
 	"github.com/xuperchain/xvm/exec"
-	"github.com/xuperchain/xvm/runtime/emscripten"
 )
 
 func compileLibrary(wasmpath string) (string, error) {
@@ -42,13 +41,12 @@ func replaceExt(name, ext string) string {
 	return filepath.Join(dir, file)
 }
 
-func ExampleSpec() {
+func ExampleAdd() {
 	modulePath, err := compileLibrary("testdata/add.wasm")
 	if err != nil {
 		log.Fatal(err)
 	}
-	resolver := emscripten.NewResolver()
-	code, err := exec.NewAOTCode(modulePath, resolver)
+	code, err := exec.NewAOTCode(modulePath,nil)
 	if err != nil {
 		log.Fatal(err)
 	}

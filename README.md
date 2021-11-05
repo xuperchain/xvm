@@ -5,7 +5,7 @@ XuperVM 是 [XuperChain](https://xuper.baidu.com/n/ps/opensource) 旗下的高�
 ## 快速开始
 ### 构建
 ```shell script
-    git https://github.com/xuperchain/xvm.git
+    git clone https://github.com/xuperchain/xvm.git
     cd xvm 
     make
     # 设置环境变量
@@ -68,8 +68,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	resolver := emscripten.NewResolver()
-	code, err := exec.NewAOTCode(modulePath, resolver)
+	code, err := exec.NewAOTCode(modulePath, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -180,3 +180,7 @@ func (rt *Runtime) syscallJsCopyBytesToJS(dst js.Ref, src []byte) (int64, bool) 
 	n := copy(slice, src)
 	return int64(n), true
 }
+
+func (rt *Runtime) Global() *js.Global {
+	return rt.global
+}

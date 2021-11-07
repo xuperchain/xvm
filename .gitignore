@@ -1,3 +1,4 @@
 compile/wabt/build
 .vscode
 .idea
+coverage.txt

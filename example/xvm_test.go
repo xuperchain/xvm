@@ -80,7 +80,7 @@ func ExampleGo() {
 		log.Fatal(err)
 	}
 	cmd.Dir = filepath.Join(cwd, "testdata/go")
-	err = cmd.Start()
+	err = cmd.Run()
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -8,8 +8,8 @@ DEPS := $(OBJS:.o=.d)
 INC_DIRS := . src
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
-CPPFLAGS ?= $(INC_FLAGS) -MMD -MP -std=c++11
-CFLAGS ?= $(INC_FLAGS) -MMD -MP
+CPPFLAGS := $(INC_FLAGS) -MMD -MP -std=c++11
+CFLAGS := $(INC_FLAGS) -MMD -MP
 
 .PHONY: clean all
 

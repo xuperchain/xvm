@@ -1,0 +1,21 @@
+on:
+  # but only for the main branch
+  push:
+    branches:
+      - main
+
+name: Mirror
+jobs:
+  test:
+    strategy:
+      matrix:
+        platform: [ubuntu-18.04]
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v1
+      - uses: spyoungtech/mirror-action@master
+        with:
+          REMOTE: 'https://gitlab.com/chenfengjin/xvm1.git'
+          GIT_USERNAME: ${{ secrets.GIT_USERNAME }}
+          GIT_PASSWORD: ${{ secrets.GIT_PASSWORD }}
+

@@ -3,7 +3,6 @@ package wasi
 import "github.com/xuperchain/xvm/exec"
 
 var resolver = exec.MapResolver(map[string]interface{}{
-	// for LLVM backend
 	"wasi_snapshot_preview1.fd_prestat_get": func(ctx exec.Context, x, y uint32) uint32 {
 		return 8
 	},

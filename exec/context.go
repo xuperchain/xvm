@@ -22,6 +22,10 @@ type ErrFuncNotFound struct {
 func (e *ErrFuncNotFound) Error() string {
 	return fmt.Sprintf("%s not found", e.Name)
 }
+func (e *ErrFuncNotFound) Is(err error) bool {
+	err1, ok := err.(*ErrFuncNotFound)
+	return ok && err1.Name == e.Name
+}
 
 // ContextConfig configures an execution context
 type ContextConfig struct {

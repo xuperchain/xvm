@@ -94,7 +94,7 @@ func run(modulePath string, args []string) error {
 	resolver := exec.NewMultiResolver(resolver, gowasm.NewResolver(), emscripten.NewResolver(), wasi.NewResolver())
 	var code exec.Code
 	if !*interpmode {
-		code, err = exec.NewAOTCode(fullepath, resolver)
+		code, err = exec.NewAOTCode(fullepath, resolver, &exec.CodeConfig{})
 		if err != nil {
 			return err
 		}

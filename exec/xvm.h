@@ -16,7 +16,6 @@
 
 #ifndef XVM_H_
 #define XVM_H_
-
 #include "wasm-rt.h"
 
 #ifdef __cplusplus
@@ -44,9 +43,31 @@ typedef struct xvm_resolver_t {
 } xvm_resolver_t;
 
 struct FuncType;
+// TODO
+typedef int bool;
+typedef struct xvm_memory_config {
+    // memory grow
+    bool memory_grow_enabled;
+    int memory_grow_initialize;
+    int memory_grow_maximium;
+
+    bool populate_enabled;
+    int populate_threshold;
+
+    bool huge_page_enabled;
+    int hugepage_size;
+} xvm_memory_config;
+
+typedef struct xvm_code_config {
+    xvm_memory_config* memory_config;
+} xvm_code_config;
+
 typedef struct xvm_code_t {
     void* dlhandle;
     struct FuncType* func_types;
+    xvm_memory_config* config;
+
+    // xvm_code_config *config;
     uint32_t func_type_count;
     xvm_resolver_t resolver;
     void* (*new_handle_func)(void*);
@@ -55,7 +76,9 @@ typedef struct xvm_code_t {
 } xvm_code_t;
 
 xvm_code_t* xvm_new_code(char* module_path, xvm_resolver_t resolver);
-int xvm_init_code(xvm_code_t* code);
+int xvm_init_code(xvm_code_t* code, xvm_memory_config* config);
+// int xvm_init_code(xvm_code_t *code);
+
 void xvm_release_code(xvm_code_t* code);
 
 typedef struct xvm_context_t {

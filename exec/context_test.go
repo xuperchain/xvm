@@ -5,8 +5,12 @@ import (
 	"testing"
 )
 
+var (
+	defaultConfig = CodeConfig{}
+)
+
 func TestNewContext(t *testing.T) {
-	withCode(t, "testdata/add.wat", nil, func(code Code) {
+	withCode(t, "testdata/add.wat", nil, defaultConfig, func(code Code) {
 		ctx, err := code.NewContext(DefaultContextConfig())
 		if err != nil {
 			t.Fatal(err)
@@ -32,7 +36,7 @@ func TestResolveFunc(t *testing.T) {
 			return 0
 		},
 	})
-	withCode(t, "testdata/extern_func.wat", r, func(code Code) {
+	withCode(t, "testdata/extern_func.wat", r, defaultConfig, func(code Code) {
 		ctx, err := code.NewContext(DefaultContextConfig())
 		if err != nil {
 			t.Fatal(err)
@@ -65,7 +69,7 @@ func TestGasUsed(t *testing.T) {
 		"env.STACKTOP":       int64(4 << 10),
 		"env.DYNAMICTOP_PTR": int64(4<<10 + 4),
 	})
-	withCode(t, "testdata/malloc.wat", r, func(code Code) {
+	withCode(t, "testdata/malloc.wat", r, defaultConfig, func(code Code) {
 		ctx, err := code.NewContext(DefaultContextConfig())
 		if err != nil {
 			t.Fatal(err)
@@ -87,7 +91,7 @@ func BenchmarkExecParallel(b *testing.B) {
 			return 0
 		},
 	})
-	withCode(b, "testdata/extern_func.wat", r, func(code Code) {
+	withCode(b, "testdata/extern_func.wat", r, defaultConfig, func(code Code) {
 		b.RunParallel(func(pb *testing.PB) {
 			for pb.Next() {
 				ctx, err := code.NewContext(DefaultContextConfig())
@@ -110,7 +114,7 @@ func BenchmarkExecSerial(b *testing.B) {
 			return 0
 		},
 	})
-	withCode(b, "testdata/extern_func.wat", r, func(code Code) {
+	withCode(b, "testdata/extern_func.wat", r, defaultConfig, func(code Code) {
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
 			ctx, err := code.NewContext(DefaultContextConfig())
@@ -133,7 +137,7 @@ func BenchmarkExecWorker(b *testing.B) {
 		},
 	})
 
-	withCode(b, "testdata/extern_func.wat", r, func(code Code) {
+	withCode(b, "testdata/extern_func.wat", r, defaultConfig, func(code Code) {
 		wg := new(sync.WaitGroup)
 		worker := func(ch chan int) {
 			for range ch {

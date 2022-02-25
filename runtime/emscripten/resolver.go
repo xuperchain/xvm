@@ -130,9 +130,6 @@ var resolver = exec.MapResolver(map[string]interface{}{
 		exec.Throw(exec.NewTrap("abort"))
 		return 0
 	},
-	"env.pthread_equal": func(exec.Context, uint32, uint32) uint32 {
-		return 0
-	},
 	"env.___cxa_allocate_exception": func(ctx exec.Context, x uint32) uint32 {
 		exec.Throw(exec.NewTrap("allocate exception"))
 		return 0

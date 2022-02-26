@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// TODO
 
-#define __USE_MISC
 #include "xvm.h"
 
 #include <assert.h>
@@ -109,9 +107,15 @@ static void wasm_rt_allocate_memory(void* context, wasm_rt_memory_t* memory,
     xvm_context_t* ctx = context;
     xvm_memory_config* config = ctx->code->config;
     int flag = MAP_PRIVATE | MAP_ANONYMOUS;
+
+    if (config->memory_grow_enabled &&
+        initial_pages < config->memory_grow_initialize) {
+        initial_pages = config->memory_grow_initialize;
+    }
     memory->pages = initial_pages;
     memory->max_pages = max_pages;
     memory->size = initial_pages * PAGE_SIZE;
+
     if (memory->size != 0) {
         memory->data =
             mmap(0, memory->size, PROT_READ | PROT_WRITE, flag, -1, 0);
@@ -144,11 +148,9 @@ static uint32_t wasm_rt_grow_memory(void* context, wasm_rt_memory_t* memory,
     xvm_context_t* ctx = context;
     xvm_memory_config* config = ctx->code->config;
     if (!config->memory_grow_enabled) {
-        printf("%d\n", 1);
         wasm_rt_trap(WASM_RT_TRAP_OOB);
     }
     if (delta < 0) {
-        printf("%d\n", 2);
         wasm_rt_trap(WASM_RT_TRAP_OOB);
     }
 
@@ -161,13 +163,9 @@ static uint32_t wasm_rt_grow_memory(void* context, wasm_rt_memory_t* memory,
         return -1;
     }
     if (new_pages < old_pages || new_pages > memory->max_pages) {
-        printf("%d\n", 3);
-
         wasm_rt_trap(WASM_RT_TRAP_OOB);
     }
     if (new_pages > config->memory_grow_maximium) {
-        printf("%d\n", 4);
-
         wasm_rt_trap(WASM_RT_TRAP_OOB);
     }
 
@@ -182,18 +180,21 @@ static uint32_t wasm_rt_grow_memory(void* context, wasm_rt_memory_t* memory,
 #endif  // HUGEPAGE
 
     memory->pages = new_pages;
-
     uint8_t* new_addr = NULL;
+
 #ifdef __USE_GNU
     new_addr = mremap(memory->data, memory->size, PAGE_SIZE * new_pages,
                       PROT_READ | PROT_WRITE);
 #else
     new_addr = mmap(0, new_pages * PAGE_SIZE, PROT_READ | PROT_WRITE,
                     MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    if (new_addr != MAP_FAILED) {
-        memmove(new_addr, memory->data, memory->size);
-        munmap(memory->data, memory->size);
+    if (new_addr == MAP_FAILED) {
+        xvm_raise(TRAP_NO_MEMORY);
     }
+
+    memmove(new_addr, memory->data, memory->size);
+    munmap(memory->data, memory->size);
+
     memory->data = new_addr;
     memory->size = new_pages * PAGE_SIZE;
 #endif
@@ -325,6 +326,11 @@ void xvm_release_code(xvm_code_t* code) {
     if (code->dlhandle != NULL) {
         dlclose(code->dlhandle);
     }
+    if (code->config != NULL) {
+        xvm_free(code->config);
+        code->config = NULL;
+    }
+
     xvm_free(code);
     memset((void*)code, 0, sizeof(xvm_code_t));
 }
@@ -412,3 +418,8 @@ static void* xvm_realloc(void* ptr, size_t size) {
 }
 
 static void xvm_free(void* ptr) { free(ptr); }
+
+xvm_memory_config* xvm_new_memory_config() {
+    xvm_memory_config* config = xvm_malloc(sizeof(xvm_memory_config));
+    return config;
+}

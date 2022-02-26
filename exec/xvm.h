@@ -46,7 +46,6 @@ struct FuncType;
 // TODO
 typedef int bool;
 typedef struct xvm_memory_config {
-    // memory grow
     bool memory_grow_enabled;
     int memory_grow_initialize;
     int memory_grow_maximium;
@@ -77,7 +76,7 @@ typedef struct xvm_code_t {
 
 xvm_code_t* xvm_new_code(char* module_path, xvm_resolver_t resolver);
 int xvm_init_code(xvm_code_t* code, xvm_memory_config* config);
-// int xvm_init_code(xvm_code_t *code);
+xvm_memory_config* xvm_new_memory_config();
 
 void xvm_release_code(xvm_code_t* code);
 

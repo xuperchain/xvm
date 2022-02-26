@@ -4,7 +4,7 @@ package exec
 // #include "stdlib.h"
 // extern xvm_resolver_t make_resolver_t(void* env);
 // #cgo LDFLAGS: -ldl
-// #cgo linux CFLAGS: -DHUGEPAGE
+// #cgo linux CFLAGS: -DHUGEPAGE -D__USE_MISC
 // #cgo linux CFLAGS: -DUSE_GNU
 import "C"
 import (
@@ -18,21 +18,41 @@ import (
 type CodeConfig struct {
 	MemoryConfig MemoryConfig
 }
-type MemoryConfig struct {
-	MemoryGrow struct {
-		Enabled    bool
-		Initialize int
-		Maximium   int
-	}
-	Populate struct {
-		Enabled bool
-	}
-	HugePage struct {
-		Enabled bool
-		// TODO determine huge page size
-		Size int
-	}
+type MemoryGrowConfig struct {
+	Enabled    bool
+	Initialize int
+	Maximium   int
 }
+type PopulateConfig struct {
+	Enabled   bool
+	Threshold int
+}
+type HugePageConfig struct {
+	Enabled bool
+}
+type MemoryConfig struct {
+	MemoryGrow MemoryGrowConfig
+	Populate   PopulateConfig
+	HugePage   HugePageConfig
+}
+
+var (
+	DefaultCodeConfig = CodeConfig{
+		MemoryConfig: MemoryConfig{
+			MemoryGrow: MemoryGrowConfig{
+				Enabled:    false,
+				Initialize: 1,
+			},
+			Populate: PopulateConfig{
+				Enabled:   false,
+				Threshold: 0,
+			},
+			HugePage: HugePageConfig{
+				Enabled: false,
+			},
+		},
+	}
+)
 
 // Code represents the wasm code object
 type aotCode struct {
@@ -66,16 +86,25 @@ func NewAOTCode(module string, resolver Resolver, config *CodeConfig) (icode Cod
 		err = fmt.Errorf("open module %s error", module)
 		return
 	}
-	cConfig := C.xvm_memory_config{}
 
-	cConfig.memory_grow_enabled = 1
-	cConfig.memory_grow_maximium = C.int(config.MemoryConfig.MemoryGrow.Maximium)
-	// cConfig.memory_config = &C.xvm_memory_config{}
+	cConfig := C.xvm_new_memory_config()
+
+	if config.MemoryConfig.MemoryGrow.Enabled {
+		cConfig.memory_grow_enabled = 1
+		cConfig.memory_grow_initialize = C.int(config.MemoryConfig.MemoryGrow.Initialize)
+		cConfig.memory_grow_maximium = C.int(config.MemoryConfig.MemoryGrow.Maximium)
+	}
+
 	if config.MemoryConfig.Populate.Enabled {
 		cConfig.populate_enabled = 1
+		cConfig.populate_threshold = C.int(config.MemoryConfig.Populate.Threshold)
 	}
-	// TODO
-	ret := C.xvm_init_code(code.code, &cConfig)
+
+	if config.MemoryConfig.HugePage.Enabled {
+		cConfig.huge_page_enabled = 1
+	}
+
+	ret := C.xvm_init_code(code.code, cConfig)
 	if ret == 0 {
 		err = fmt.Errorf("init module %s error", module)
 		return

@@ -33,8 +33,6 @@ func withCode(t testing.TB, watCode string, r Resolver, config CodeConfig, f fun
 	if err != nil {
 		t.Fatal(err)
 	}
-	// config := CodeConfig{}
-	// config.MemoryConfig.Populate.Enabled = true
 	code, err := NewAOTCode(libpath, r, &config)
 	if err != nil {
 		t.Fatal(err)
@@ -43,11 +41,10 @@ func withCode(t testing.TB, watCode string, r Resolver, config CodeConfig, f fun
 	code.Release()
 }
 
-//
-// func TestNewCode(t *testing.T) {
-// 	withCode(t, "testdata/sum.wat", nil, func(code Code) {
-// 	})
-// }
+func TestNewCode(t *testing.T) {
+	withCode(t, "testdata/sum.wat", nil, DefaultCodeConfig, func(code Code) {
+	})
+}
 
 func BenchmarkNewCode(b *testing.B) {
 	b.Run("populate", func(b *testing.B) {

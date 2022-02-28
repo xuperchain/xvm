@@ -9,7 +9,7 @@ import (
 	"github.com/xuperchain/xvm/compile"
 )
 
-func withCode(t testing.TB, watCode string, r Resolver, f func(code Code)) {
+func withCode(t testing.TB, watCode string, r Resolver, config CodeConfig, f func(code Code)) {
 	tmpdir, err := ioutil.TempDir("", "xvm-exec-test")
 	if err != nil {
 		t.Fatal(err)
@@ -33,7 +33,7 @@ func withCode(t testing.TB, watCode string, r Resolver, f func(code Code)) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	code, err := NewAOTCode(libpath, r)
+	code, err := NewAOTCode(libpath, r, &config)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -42,6 +42,38 @@ func withCode(t testing.TB, watCode string, r Resolver, f func(code Code)) {
 }
 
 func TestNewCode(t *testing.T) {
-	withCode(t, "testdata/sum.wat", nil, func(code Code) {
+	withCode(t, "testdata/sum.wat", nil, DefaultCodeConfig, func(code Code) {
+	})
+}
+
+func BenchmarkNewCode(b *testing.B) {
+	b.Run("populate", func(b *testing.B) {
+		config := CodeConfig{}
+		config.MemoryConfig.Populate.Enabled = true
+		withCode(b, "testdata/add.wat", nil, config, func(code Code) {
+			for i := 0; i < b.N; i++ {
+				ctx, err := code.NewContext(&ContextConfig{GasLimit: MaxGasLimit})
+				if err != nil {
+					b.Fatal(err)
+				}
+				ctx.Exec("_add", []int64{1, 2})
+				ctx.Release()
+			}
+		})
+	})
+
+	b.Run("BaseLine", func(b *testing.B) {
+		config := CodeConfig{}
+		config.MemoryConfig.Populate.Enabled = false
+		withCode(b, "testdata/add.wat", nil, config, func(code Code) {
+			for i := 0; i < b.N; i++ {
+				ctx, err := code.NewContext(&ContextConfig{GasLimit: MaxGasLimit})
+				if err != nil {
+					b.Fatal(err)
+				}
+				ctx.Exec("_add", []int64{1, 2})
+				ctx.Release()
+			}
+		})
 	})
 }

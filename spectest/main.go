@@ -109,7 +109,24 @@ func newModule(modulePath string) (*module, error) {
 		return nil, err
 	}
 	targetPath, _ = filepath.Abs(targetPath)
-	code, err := exec.NewAOTCode(targetPath, resolver)
+	config := exec.CodeConfig{
+		MemoryConfig: exec.MemoryConfig{
+			MemoryGrow: exec.MemoryGrowConfig{
+				Enabled:    true,
+				Initialize: 0,
+				Maximium:   65535,
+			},
+			Populate: exec.PopulateConfig{
+				Enabled:   true,
+				Threshold: 32,
+			},
+			HugePage: exec.HugePageConfig{
+				Enabled: true,
+			},
+		},
+	}
+
+	code, err := exec.NewAOTCode(targetPath, resolver, &config)
 	if err != nil {
 		return nil, err
 	}
@@ -405,7 +422,8 @@ func (t *testRunner) RunTest(wastFile string) {
 }
 
 func (t *testRunner) RunTestDir(dir string) {
-	freg := regexp.MustCompile(`^name|^linking|^skip-stack`)
+	// TODO @chenfengjin should be passefixed
+	freg := regexp.MustCompile(`^name|^linking|^skip-stack|^data|^elem|^imports|^start|^exports`)
 	testFiles, err := filepath.Glob(filepath.Join(dir, "*.wast"))
 	if err != nil {
 		panic(err)

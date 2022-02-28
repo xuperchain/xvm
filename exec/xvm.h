@@ -43,8 +43,10 @@ typedef struct xvm_resolver_t {
 } xvm_resolver_t;
 
 struct FuncType;
-// TODO
 typedef int bool;
+#define TRUE 1
+#define FALSE 0
+
 typedef struct xvm_memory_config {
     bool memory_grow_enabled;
     int memory_grow_initialize;

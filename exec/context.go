@@ -83,6 +83,7 @@ func (code *aotCode) NewContext(cfg *ContextConfig) (ictx Context, err error) {
 		return nil, errors.New("init context error")
 	}
 	ictx = ctx
+	fmt.Println("before exec:", len(ctx.Memory()))
 	runtime.SetFinalizer(ctx, (*aotContext).Release)
 	return ictx, nil
 }

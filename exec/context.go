@@ -137,6 +137,7 @@ func (c *aotContext) Exec(name string, param []int64) (ret int64, err error) {
 			Name: name,
 		}
 	}
+	fmt.Println("memory size after exec", len(c.Memory()))
 	ret = int64(cret)
 	return
 }

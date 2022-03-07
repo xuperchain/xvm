@@ -471,4 +471,7 @@ func main() {
 	}
 	fmt.Printf("total:%d passed:%d(%0.2f%%)\n", runner.total, runner.passed, 100*float32(runner.passed)/float32(runner.total))
 	runner.Close()
+	if runner.total != runner.passed {
+		os.Exit(-1)
+	}
 }

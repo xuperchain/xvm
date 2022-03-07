@@ -22,11 +22,6 @@ const (
 	stackSize = 256 << 10 // 256KB
 )
 
-var (
-	errMallocNotFound = &exec.ErrFuncNotFound{Name: "_malloc"}
-	errFreeNotFound   = &exec.ErrFuncNotFound{Name: "_free"}
-)
-
 func unimplemented(symbol string) {
 	exec.Throw(exec.NewTrap(fmt.Sprintf("%s not implemented", symbol)))
 }
@@ -249,11 +244,6 @@ func errno(n int32) uint32 {
 // memory must be freed either by Free or by wasm runtime
 func Malloc(ctx exec.Context, size int) (uint32, error) {
 	ret, err := ctx.Exec("_malloc", []int64{int64(size)})
-
-	if errors.Is(err, errMallocNotFound) {
-		ret, err = ctx.Exec("malloc", []int64{int64(size)})
-	}
-
 	if err != nil {
 		return 0, err
 	}
@@ -266,9 +256,5 @@ func Malloc(ctx exec.Context, size int) (uint32, error) {
 // Free call free on wasm runtime
 func Free(ctx exec.Context, ptr uint32) error {
 	_, err := ctx.Exec("_free", []int64{int64(ptr)})
-
-	if errors.Is(err, errFreeNotFound) {
-		_, err = ctx.Exec("free", []int64{int64(ptr)})
-	}
 	return err
 }

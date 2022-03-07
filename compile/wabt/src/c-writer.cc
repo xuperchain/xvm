@@ -1125,7 +1125,9 @@ void CWriter::WriteDataInitializers() {
   Write(Newline(), "static void init_memory(wasm_rt_handle_t* h) ", OpenBrace());
   uint32_t max_off = 0;
   if (memory) {
-    uint32_t init_page = memory->page_limits.initial == 0 ? 1 : memory->page_limits.initial;
+      uint32_t init_page = memory->page_limits.initial;
+
+//    uint32_t init_page = memory->page_limits.initial == 0 ? 1 : memory->page_limits.initial;
     uint32_t max_page = memory->page_limits.has_max ? memory->page_limits.max : 65536;
     uint32_t mem_size = init_page * 65536;
     Write("(*g_rt_ops.wasm_rt_allocate_memory)(",

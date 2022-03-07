@@ -108,20 +108,26 @@ static void wasm_rt_allocate_memory(void* context, wasm_rt_memory_t* memory,
     xvm_memory_config* config = ctx->code->config;
     int flag = MAP_PRIVATE | MAP_ANONYMOUS;
 
-    if (config->memory_grow_enabled &&
-        initial_pages < config->memory_grow_initialize) {
+    //  for backward compatibility that every context is allocated at least 1
+    //  pages
+    if (initial_pages < config->memory_grow_initialize) {
         initial_pages = config->memory_grow_initialize;
     }
+    //  for memory constraint
+    if (initial_pages > config->memory_grow_maximium) {
+        wasm_rt_trap(WASM_RT_TRAP_OOB);
+    }
+
     memory->pages = initial_pages;
     memory->max_pages = max_pages;
     memory->size = initial_pages * PAGE_SIZE;
-
-    if (memory->size != 0) {
-        memory->data =
-            mmap(0, memory->size, PROT_READ | PROT_WRITE, flag, -1, 0);
-        if (memory->data == MAP_FAILED) {
-            xvm_raise(TRAP_NO_MEMORY);
-        }
+    if (memory->size == 0) {
+        ctx->mem = memory;
+        return;
+    }
+    memory->data = mmap(0, memory->size, PROT_READ | PROT_WRITE, flag, -1, 0);
+    if (memory->data == MAP_FAILED) {
+        xvm_raise(TRAP_NO_MEMORY);
     }
     int advise = 0;
     if (config->populate_enabled &&
@@ -135,7 +141,6 @@ static void wasm_rt_allocate_memory(void* context, wasm_rt_memory_t* memory,
 #endif  // HUGEPAGE
 
     madvise(memory->data, memory->size, advise);
-
     ctx->mem = memory;
 }
 
@@ -153,6 +158,9 @@ static uint32_t wasm_rt_grow_memory(void* context, wasm_rt_memory_t* memory,
     if (delta < 0) {
         wasm_rt_trap(WASM_RT_TRAP_OOB);
     }
+    if (delta == 0) {
+        return memory->pages;
+    }
 
     uint32_t old_pages = memory->pages;
     uint32_t new_pages = memory->pages + delta;
@@ -162,7 +170,7 @@ static uint32_t wasm_rt_grow_memory(void* context, wasm_rt_memory_t* memory,
     if (new_pages > memory->max_pages) {
         return -1;
     }
-    if (new_pages < old_pages || new_pages > memory->max_pages) {
+    if (new_pages < old_pages) {
         wasm_rt_trap(WASM_RT_TRAP_OOB);
     }
     if (new_pages > config->memory_grow_maximium) {

@@ -41,7 +41,8 @@ var (
 		MemoryConfig: MemoryConfig{
 			MemoryGrow: MemoryGrowConfig{
 				Enabled:    false,
-				Initialize: 1,
+				Initialize: 0,
+				Maximium:   1024,
 			},
 			Populate: PopulateConfig{
 				Enabled:   false,
@@ -88,11 +89,11 @@ func NewAOTCode(module string, resolver Resolver, config *CodeConfig) (icode Cod
 	}
 
 	cConfig := C.xvm_new_memory_config()
+	cConfig.memory_grow_initialize = C.int(config.MemoryConfig.MemoryGrow.Initialize)
+	cConfig.memory_grow_maximium = C.int(config.MemoryConfig.MemoryGrow.Maximium)
 
 	if config.MemoryConfig.MemoryGrow.Enabled {
 		cConfig.memory_grow_enabled = 1
-		cConfig.memory_grow_initialize = C.int(config.MemoryConfig.MemoryGrow.Initialize)
-		cConfig.memory_grow_maximium = C.int(config.MemoryConfig.MemoryGrow.Maximium)
 	}
 
 	if config.MemoryConfig.Populate.Enabled {

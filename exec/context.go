@@ -83,7 +83,6 @@ func (code *aotCode) NewContext(cfg *ContextConfig) (ictx Context, err error) {
 		return nil, errors.New("init context error")
 	}
 	ictx = ctx
-	fmt.Println("before exec:", len(ctx.Memory()))
 	runtime.SetFinalizer(ctx, (*aotContext).Release)
 	return ictx, nil
 }
@@ -142,7 +141,6 @@ func (c *aotContext) Exec(name string, param []int64) (ret int64, err error) {
 			Name: name,
 		}
 	}
-	fmt.Println("memory size after exec", len(c.Memory()))
 	ret = int64(cret)
 	return
 }

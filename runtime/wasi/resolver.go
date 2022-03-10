@@ -1,6 +1,15 @@
 package wasi
 
-import "github.com/xuperchain/xvm/exec"
+import (
+	"unsafe"
+
+	"github.com/xuperchain/xvm/debug"
+	"github.com/xuperchain/xvm/exec"
+)
+
+func errno(n int32) uint32 {
+	return *(*uint32)(unsafe.Pointer(&n))
+}
 
 var resolver = exec.MapResolver(map[string]interface{}{
 	"wasi_snapshot_preview1.fd_prestat_get": func(ctx exec.Context, x, y uint32) uint32 {
@@ -18,8 +27,21 @@ var resolver = exec.MapResolver(map[string]interface{}{
 	"wasi_snapshot_preview1.fd_seek": func(ctx exec.Context, x, y, z, w uint32) uint32 {
 		return 8
 	},
-	"wasi_snapshot_preview1.fd_write": func(ctx exec.Context, x, y, z, w uint32) uint32 {
-		return 8
+	"wasi_snapshot_preview1.fd_write": func(ctx exec.Context, fd, y, iovcnt, w uint32) uint32 {
+		codec := exec.NewCodec(ctx)
+		// only stdout and stderr is supported
+		if fd != 1 && fd != 2 {
+			return errno(-9)
+		}
+		total := uint32(0)
+		for i := uint32(0); i < iovcnt; i++ {
+			base := codec.Uint32(y + 8*i)
+			length := codec.Uint32(y + 8*i + 4)
+			buf := codec.Bytes(base, length)
+			debug.Write(ctx, buf)
+			total += length
+		}
+		return total
 	},
 	"wasi_snapshot_preview1.environ_sizes_get": func(ctx exec.Context, x, y uint32) uint32 {
 		return 0

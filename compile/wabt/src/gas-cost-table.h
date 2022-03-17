@@ -394,7 +394,7 @@ std::map<std::string, uint32_t> kGasCostTable = {
   {"memory.fill"                 , 100000         },
   {"memory.grow"                 , 100000         },
   {"memory.init"                 , 100000         },
-  {"memory.size"                 , 10000000       },
+  {"memory.size"                 , 2              },
   {"nop"                         , 0              },
   {"ref.is_null"                 , 100000         },
   {"ref.null"                    , 100000         },

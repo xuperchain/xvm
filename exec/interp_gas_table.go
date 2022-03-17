@@ -401,7 +401,7 @@ var gasCostTable = map[string]int64{
 	"memory.fill":                100000,
 	"memory.grow":                100000,
 	"memory.init":                100000,
-	"memory.size":                10000000,
+	"memory.size":                2,
 	"nop":                        0,
 	"ref.func":                   100000,
 	"ref.is_null":                100000,

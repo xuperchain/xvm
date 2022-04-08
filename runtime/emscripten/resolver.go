@@ -104,6 +104,13 @@ var resolver = exec.MapResolver(map[string]interface{}{
 	"env.enlargeMemory": func(ctx exec.Context) uint32 {
 		return 0
 	},
+	"env.emscripten_memcpy_big": func(ctx exec.Context, dest, src, len uint32) uint32 {
+		codec := exec.NewCodec(ctx)
+		destbuf := codec.Bytes(dest, len)
+		srcbuf := codec.Bytes(src, len)
+		copy(destbuf, srcbuf)
+		return len
+	},
 	"env._emscripten_memcpy_big": func(ctx exec.Context, dest, src, len uint32) uint32 {
 		codec := exec.NewCodec(ctx)
 		destbuf := codec.Bytes(dest, len)
@@ -118,6 +125,11 @@ var resolver = exec.MapResolver(map[string]interface{}{
 		}
 		return 0
 	},
+	"env.emscripten_resize_heap": func(ctx exec.Context, size uint32) uint32 {
+		unimplemented("emscripten_resize_heap")
+		return 0
+	},
+
 	"env._emscripten_resize_heap": func(ctx exec.Context, size uint32) uint32 {
 		unimplemented("emscripten_resize_heap")
 		return 0
@@ -239,6 +251,76 @@ var resolver = exec.MapResolver(map[string]interface{}{
 	"env.DYNAMICTOP_PTR": int64(mutableGlobalsBase + uint32(unsafe.Offsetof(new(mutableGlobals).HeapBase))),
 	"global.NaN":         int64(math.Float64bits(math.NaN())),
 	"global.Infinity":    int64(math.Float64bits(math.Inf(0))),
+
+	//TODO @fengjin  absent functions should be implemented soon
+	"env.emscripten_asm_const_int": func(ctx exec.Context, code, sigPtr, argBuf uint32) uint32 {
+		addr, err := Malloc(ctx, 1024)
+		if err != nil {
+			exec.ThrowError(err)
+		}
+		return addr
+	},
+	"env.emscripten_asm_const_double": func(ctx exec.Context, code, sigPtr, argBuf uint32) uint32 {
+		addr, err := Malloc(ctx, 1024)
+		if err != nil {
+			exec.ThrowError(err)
+		}
+		return addr
+	},
+
+	"env.emscripten_get_heap_max": func(ctx exec.Context) uint32 {
+		return 0
+	},
+	"env.__syscall_stat64": func(ctx exec.Context, x, y uint32) uint32 {
+		return 0
+	},
+	"env.emscripten_return_address": func(ctx exec.Context, level uint32) uint32 {
+		return 0
+	},
+	"env.__syscall_dup": func(ctx exec.Context, x uint32) uint32 {
+		return 0
+	},
+	"env.emscripten_get_now": func(ctx exec.Context) float64 {
+		return 0
+	},
+	"env.emscripten_get_module_name": func(ctx exec.Context, buf, length uint32) uint32 {
+		return 0
+	},
+	"env.atexit": func(ctx exec.Context, args uint32) uint32 {
+		return 0
+	},
+
+	"env.emscripten_builtin_mmap2": func(ctx exec.Context, addr, len, prot, flags, fd, off uint32) uint32 {
+		if flags&uint32(32) == 0 {
+			exec.ThrowMessage("only anonymous mmap is allowed")
+		}
+		ptr, err := Malloc(ctx, int(len))
+		if err != nil {
+			return 0
+		}
+		return ptr
+	},
+	"env.emscripten_builtin_munmap": func(ctx exec.Context, addr uint32, len uint32) uint32 {
+		return 0
+	},
+	"env.__syscall_open": func(exec.Context, uint32, uint32, uint32) uint32 {
+		return 0
+	},
+	"env.emscripten_stack_unwind_buffer": func(ctx exec.Context, x, y, z uint32) uint32 {
+		return 0
+	},
+	"env.emscripten_pc_get_function": func(ctx exec.Context, x uint32) uint32 {
+		return 0
+	},
+	"env.emscripten_pc_get_file": func(ctx exec.Context, x uint32) uint32 {
+		return 0
+	},
+	"env.emscripten_pc_get_line": func(ctx exec.Context, x uint32) uint32 {
+		return 0
+	},
+	"env.emscripten_pc_get_column": func(ctx exec.Context, x uint32) uint32 {
+		return 0
+	},
 })
 
 func errno(n int32) uint32 {

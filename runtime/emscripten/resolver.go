@@ -254,14 +254,14 @@ var resolver = exec.MapResolver(map[string]interface{}{
 
 	//TODO @fengjin  absent functions should be implemented soon
 	"env.emscripten_asm_const_int": func(ctx exec.Context, code, sigPtr, argBuf uint32) uint32 {
-		addr, err := Malloc(ctx, 1024)
+		addr, err := builtinMalloc(ctx, 1024)
 		if err != nil {
 			exec.ThrowError(err)
 		}
 		return addr
 	},
 	"env.emscripten_asm_const_double": func(ctx exec.Context, code, sigPtr, argBuf uint32) uint32 {
-		addr, err := Malloc(ctx, 1024)
+		addr, err := builtinMalloc(ctx, 1024)
 		if err != nil {
 			exec.ThrowError(err)
 		}
@@ -294,7 +294,7 @@ var resolver = exec.MapResolver(map[string]interface{}{
 		if flags&uint32(32) == 0 {
 			exec.ThrowMessage("only anonymous mmap is allowed")
 		}
-		ptr, err := Malloc(ctx, int(len))
+		ptr, err := builtinMalloc(ctx, int(len))
 		if err != nil {
 			return 0
 		}
@@ -319,6 +319,9 @@ var resolver = exec.MapResolver(map[string]interface{}{
 		return 0
 	},
 	"env.emscripten_pc_get_column": func(ctx exec.Context, x uint32) uint32 {
+		return 0
+	},
+	"env.emscripten_stack_snapshot": func(ctx exec.Context) uint32 {
 		return 0
 	},
 })
@@ -353,4 +356,14 @@ func Free(ctx exec.Context, ptr uint32) error {
 		_, err = ctx.Exec("free", []int64{int64(ptr)})
 	}
 	return err
+}
+
+func builtinFree(ctx exec.Context, ptr uint32) error {
+	_, err := ctx.Exec("emscripten_builtin_free", []int64{int64(ptr)})
+	return err
+}
+
+func builtinMalloc(ctx exec.Context, size int) (uint32, error) {
+	ret, err := ctx.Exec("emscripten_builtin_malloc", []int64{int64(size)})
+	return uint32(ret), err
 }

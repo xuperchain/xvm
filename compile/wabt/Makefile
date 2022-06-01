@@ -13,7 +13,8 @@ CFLAGS := $(INC_FLAGS) -MMD -MP
 
 .PHONY: clean all
 
-all: $(BUILD_DIR)/wasm2c $(BUILD_DIR)/wat2wasm $(BUILD_DIR)/wast2json
+# TODO delete this guard after create new branch
+all: guard-XVM_BUILD_MAIN $(BUILD_DIR)/wasm2c $(BUILD_DIR)/wat2wasm $(BUILD_DIR)/wast2json
 
 clean:
 	$(RM) -r $(BUILD_DIR)
@@ -30,6 +31,12 @@ $(BUILD_DIR)/wat2wasm: $(BUILD_DIR)/src/tools/wat2wasm.cc.o $(BUILD_DIR)/libwabt
 
 $(BUILD_DIR)/wast2json: $(BUILD_DIR)/src/tools/wast2json.cc.o $(BUILD_DIR)/libwabt.a 
 	$(CXX) -o $@ $^
+
+guard-%:
+	@if [  "${${*}}" = "" ]; then \
+		echo "Environment variable $* not set"; \
+		exit 1; \
+	fi 
 
 # c source
 $(BUILD_DIR)/%.c.o: %.c

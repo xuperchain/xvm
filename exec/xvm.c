@@ -27,6 +27,7 @@
 #include <sys/mman.h>
 
 #define PAGE_SIZE 65536
+#define HUGEPAGE_THRESHOLD 32
 
 void (*wasm_rt_trap)(wasm_rt_trap_t code) = NULL;
 
@@ -103,20 +104,43 @@ static uint32_t wasm_rt_register_func_type(void* context, uint32_t param_count,
 static void wasm_rt_allocate_memory(void* context, wasm_rt_memory_t* memory,
                                     uint32_t initial_pages,
                                     uint32_t max_pages) {
-    if (initial_pages == 0) {
-        initial_pages = 1;
+    xvm_context_t* ctx = context;
+    xvm_memory_config* config = ctx->code->config;
+    int flag = MAP_PRIVATE | MAP_ANONYMOUS;
+
+    //  for backward compatibility that every context is allocated at least 1
+    //  pages
+    if (initial_pages < config->memory_grow_initialize) {
+        initial_pages = config->memory_grow_initialize;
     }
+    //  for memory constraint
+    if (initial_pages > config->memory_grow_maximium) {
+        wasm_rt_trap(WASM_RT_TRAP_OOB);
+    }
+
     memory->pages = initial_pages;
     memory->max_pages = max_pages;
     memory->size = initial_pages * PAGE_SIZE;
-    if (memory->size != 0) {
-        memory->data = mmap(0, memory->size, PROT_READ | PROT_WRITE,
-                            MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-        if (memory->data == MAP_FAILED) {
-            xvm_raise(TRAP_NO_MEMORY);
-        }
+    if (memory->size == 0) {
+        ctx->mem = memory;
+        return;
     }
-    xvm_context_t* ctx = context;
+    memory->data = mmap(0, memory->size, PROT_READ | PROT_WRITE, flag, -1, 0);
+    if (memory->data == MAP_FAILED) {
+        xvm_raise(TRAP_NO_MEMORY);
+    }
+    int advise = 0;
+    if (config->populate_enabled &&
+        initial_pages < config->populate_threshold) {
+        advise |= MADV_WILLNEED;
+    }
+#ifdef HUGEPAGE
+    if (config->huge_page_enabled && initial_pages > config->hugepage_size) {
+        advise |= MADV_HUGEPAGE;
+    }
+#endif  // HUGEPAGE
+
+    madvise(memory->data, memory->size, advise);
     ctx->mem = memory;
 }
 
@@ -126,18 +150,64 @@ static void wasm_rt_free_memory(wasm_rt_memory_t* mem) {
 
 static uint32_t wasm_rt_grow_memory(void* context, wasm_rt_memory_t* memory,
                                     uint32_t delta) {
-    // do not support grow memory
-    wasm_rt_trap(WASM_RT_TRAP_OOB);
+    xvm_context_t* ctx = context;
+    xvm_memory_config* config = ctx->code->config;
+    if (!config->memory_grow_enabled) {
+        wasm_rt_trap(WASM_RT_TRAP_OOB);
+    }
+    if (delta < 0) {
+        wasm_rt_trap(WASM_RT_TRAP_OOB);
+    }
+    if (delta == 0) {
+        return memory->pages;
+    }
 
     uint32_t old_pages = memory->pages;
     uint32_t new_pages = memory->pages + delta;
-    if (new_pages < old_pages || new_pages > memory->max_pages) {
-        return (uint32_t)-1;
+    if (new_pages > 65535) {
+        return -1;
     }
+    if (new_pages > memory->max_pages) {
+        return -1;
+    }
+    if (new_pages < old_pages) {
+        wasm_rt_trap(WASM_RT_TRAP_OOB);
+    }
+    if (new_pages > config->memory_grow_maximium) {
+        wasm_rt_trap(WASM_RT_TRAP_OOB);
+    }
+
+    int advise = 0;
+    if (config->populate_enabled && new_pages < config->populate_threshold) {
+        advise |= MADV_WILLNEED;
+    }
+#ifdef HUGEPAGE
+    if (config->huge_page_enabled && new_pages > HUGEPAGE_THRESHOLD) {
+        advise |= MADV_HUGEPAGE;
+    }
+#endif  // HUGEPAGE
+
     memory->pages = new_pages;
+    uint8_t* new_addr = NULL;
+
+#ifdef __USE_GNU
+    new_addr = mremap(memory->data, memory->size, PAGE_SIZE * new_pages,
+                      PROT_READ | PROT_WRITE);
+#else
+    new_addr = mmap(0, new_pages * PAGE_SIZE, PROT_READ | PROT_WRITE,
+                    MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    if (new_addr == MAP_FAILED) {
+        xvm_raise(TRAP_NO_MEMORY);
+    }
+
+    memmove(new_addr, memory->data, memory->size);
+    munmap(memory->data, memory->size);
+
+    memory->data = new_addr;
     memory->size = new_pages * PAGE_SIZE;
-    memory->data = xvm_realloc(memory->data, memory->size);
-    memset(memory->data + old_pages * PAGE_SIZE, 0, delta * PAGE_SIZE);
+#endif
+
+    madvise(new_addr, memory->size, advise);
     return old_pages;
 }
 
@@ -246,9 +316,10 @@ xvm_code_t* xvm_new_code(char* module_path, xvm_resolver_t resolver) {
     return code;
 }
 
-int xvm_init_code(xvm_code_t* code) {
+int xvm_init_code(xvm_code_t* code, xvm_memory_config* config) {
     code->init_func_types(code);
     code->init_import_funcs(code);
+    code->config = config;
     return 1;
 }
 
@@ -263,6 +334,11 @@ void xvm_release_code(xvm_code_t* code) {
     if (code->dlhandle != NULL) {
         dlclose(code->dlhandle);
     }
+    if (code->config != NULL) {
+        xvm_free(code->config);
+        code->config = NULL;
+    }
+
     xvm_free(code);
     memset((void*)code, 0, sizeof(xvm_code_t));
 }
@@ -350,3 +426,8 @@ static void* xvm_realloc(void* ptr, size_t size) {
 }
 
 static void xvm_free(void* ptr) { free(ptr); }
+
+xvm_memory_config* xvm_new_memory_config() {
+    xvm_memory_config* config = xvm_malloc(sizeof(xvm_memory_config));
+    return config;
+}

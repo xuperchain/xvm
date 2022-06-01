@@ -11,7 +11,7 @@ import (
 	"strconv"
 )
 
-const Version = "2.0"
+const Version = "2.1"
 
 // Config configures the compiler
 type Config struct {

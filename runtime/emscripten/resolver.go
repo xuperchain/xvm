@@ -230,6 +230,9 @@ var resolver = exec.MapResolver(map[string]interface{}{
 		exec.Throw(exec.NewTrap("assert_fail"))
 		return 0
 	},
+	"env.emscripten_notify_memory_growth": func(ctx exec.Context, index uint32) uint32 {
+		return 0
+	},
 
 	"env.__table_base":   int64(0),
 	"env.tableBase":      int64(0),

@@ -49,7 +49,7 @@ func ExampleAdd() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	code, err := exec.NewAOTCode(modulePath, nil)
+	code, err := exec.NewAOTCode(modulePath, nil, &exec.DefaultCodeConfig)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -91,7 +91,7 @@ func ExampleGo() {
 		log.Fatal(err)
 	}
 	resolver := gowasm.NewResolver()
-	code, err := exec.NewAOTCode(modulePath, resolver)
+	code, err := exec.NewAOTCode(modulePath, resolver, &exec.DefaultCodeConfig)
 	if err != nil {
 		log.Fatal(err)
 	}

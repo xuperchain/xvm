@@ -3,3 +3,5 @@ compile/wabt/build
 .idea
 coverage.txt
 bin
+*.so
+*/target

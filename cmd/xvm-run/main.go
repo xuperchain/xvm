@@ -126,7 +126,7 @@ func run(modulePath string, args []string) error {
 			return err
 		}
 	case "go":
-		entry = "_start"
+		entry = "run"
 		gowasm.RegisterRuntime(ctx)
 	}
 
@@ -134,13 +134,9 @@ func run(modulePath string, args []string) error {
 	if ctx.Memory() != nil {
 		argc, argv = prepareArgs(ctx.Memory(), args, nil)
 	}
-	ret, err := ctx.Exec(entry, []int64{})
+	ret, err := ctx.Exec(entry, []int64{int64(argc), int64(argv)})
 	fmt.Println("gas: ", ctx.GasUsed())
 	fmt.Println("ret: ", ret)
-	_ = argc
-	_ = argv
-	// ret, err := ctx.Exec(entry, []int64{int64(argc), int64(argv)})
-
 	return err
 }
 

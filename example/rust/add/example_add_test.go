@@ -54,7 +54,7 @@ func ExampleAdd() {
 		log.Fatal(err)
 	}
 	code, err := exec.NewAOTCode(
-		cwd+modulePath,
+		filepath.Join(cwd+modulePath),
 		exec.NewMultiResolver(
 			emscripten.NewResolver(),
 			wasi.NewResolver(),

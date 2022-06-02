@@ -52,7 +52,7 @@ func ExampleHelloWorld() {
 		log.Fatal(err)
 	}
 	code, err := exec.NewAOTCode(
-		cwd+modulePath,
+		filepath.Join(cwd, modulePath),
 		exec.NewMultiResolver(
 			rust.NewResolver(),
 		),

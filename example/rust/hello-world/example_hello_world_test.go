@@ -51,8 +51,6 @@ func ExampleHelloWorld() {
 		modulePath,
 		exec.NewMultiResolver(
 			rust.NewResolver(),
-			// emscripten.NewResolver(),
-			// wasi.NewResolver(),
 		),
 		&exec.CodeConfig{
 			MemoryConfig: struct {

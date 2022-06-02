@@ -11,7 +11,7 @@ build-wabt:
 test: utest spec 
 
 utest:
-	go test -coverprofile=coverage.txt -covermode=atomic ./...
+	go test -v -coverprofile=coverage.txt -covermode=atomic ./...
 	
 spec:
 	bash -c "cd spectest && go run main.go ./core && cd .."

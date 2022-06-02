@@ -49,6 +49,8 @@ func ExampleAdd() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	fmt.Println(modulePath)
+	fmt.Println(os.Getwd())
 	code, err := exec.NewAOTCode(
 		modulePath,
 		exec.NewMultiResolver(

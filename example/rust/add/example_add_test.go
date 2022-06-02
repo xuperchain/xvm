@@ -49,10 +49,12 @@ func ExampleAdd() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(modulePath)
-	fmt.Println(os.Getwd())
+	cwd, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
 	code, err := exec.NewAOTCode(
-		modulePath,
+		cwd+modulePath,
 		exec.NewMultiResolver(
 			emscripten.NewResolver(),
 			wasi.NewResolver(),

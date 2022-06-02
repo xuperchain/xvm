@@ -47,8 +47,12 @@ func ExampleHelloWorld() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	cwd, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
 	code, err := exec.NewAOTCode(
-		modulePath,
+		cwd+modulePath,
 		exec.NewMultiResolver(
 			rust.NewResolver(),
 		),

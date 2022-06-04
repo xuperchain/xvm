@@ -187,7 +187,8 @@ func (code *InterpCode) NewContext(cfg *ContextConfig) (ictx Context, err error)
 		exec.WithLazyCompile(true),
 		exec.WithGasMapper(new(GasMapper)),
 		exec.WithGasLimit(cfg.GasLimit),
-		exec.EnableAOT(true))
+		// exec.EnableAOT(true),
+	)
 	if err != nil {
 		return nil, err
 	}

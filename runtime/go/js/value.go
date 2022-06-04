@@ -21,6 +21,9 @@ func (v *Value) String() string {
 func (v *Value) Name() string {
 	return v.name
 }
+func (v *Value) Ref() Ref {
+	return v.ref
+}
 
 // Bytes return ref as []byte, error will return if type of ref is not Uint8Array
 func (v *Value) Bytes() ([]byte, error) {

@@ -116,7 +116,7 @@ func (rt *Runtime) syscallJsValueGet(ref js.Ref, name string) (ret js.Ref) {
 
 func (rt *Runtime) syscallJsValueSet(ref js.Ref, name string, value js.Ref) {
 	// TODO @fengjin handle no global set
-	if ref == js.ValueGlobal {
+	if ref == js.ValueGlobal.Ref() {
 		rt.global.Register(name, value)
 	}
 }

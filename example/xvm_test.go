@@ -91,7 +91,11 @@ func ExampleGo() {
 		log.Fatal(err)
 	}
 	resolver := gowasm.NewResolver()
-	code, err := exec.NewAOTCode(modulePath, resolver, &exec.DefaultCodeConfig)
+	code, err := exec.NewAOTCode(
+		filepath.Join(cwd, modulePath),
+		resolver,
+		&exec.DefaultCodeConfig,
+	)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -90,6 +90,14 @@ func main() {
 
 更多的例子可以在 [example](example) 目录里查看
 
+## 技术原理
+
+XuperVM 的整体架构如图所示
+![XVM整体架构](./docs/images/architecture.png)
+
+
+详细的技术设计文档见 [文档](https://xuper.baidu.com/n/xuperdoc/design_documents/smart_contract.html#xvm-wasm)
+
 
 ## 参与贡献
 我们欢迎任何形式的贡献(新的功能/文档/Issue)，如果你想要为XuperVM 贡献代码，你需要

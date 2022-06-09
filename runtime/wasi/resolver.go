@@ -55,8 +55,15 @@ var resolver = exec.MapResolver(map[string]interface{}{
 	"wasi_snapshot_preview1.args_get": func(ctx exec.Context, x, y uint32) uint32 {
 		return 0
 	},
+	"wasi_snapshot_preview1.fd_read": func(ctx exec.Context, a, b, c, d uint32) uint32 {
+		return 0
+	},
+
 	"wasi_snapshot_preview1.proc_exit": func(ctx exec.Context, x uint32) uint32 {
 		exec.Throw(exec.NewTrap("exit"))
+		return 0
+	},
+	"wasi_snapshot_preview1.clock_time_get": func(exec.Context, uint32, uint64, uint32) uint32 {
 		return 0
 	},
 })

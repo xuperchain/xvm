@@ -30,7 +30,7 @@ func (r *resolver) resolveFunc(module, name string) (interface{}, bool) {
 		return (*Runtime).getRandomData, true
 	case "go::runtime.scheduleCallback": // for go.11
 		return (*Runtime).scheduleCallback, true
-	case "go::runtime.clearScheduledCallback": // for go.11
+	case "go::runtime.clearScheduledCallback": // for go.`11`
 		return (*Runtime).clearScheduledCallback, true
 	case "go::runtime.scheduleTimeoutEvent":
 		return (*Runtime).scheduleCallback, true
@@ -64,6 +64,18 @@ func (r *resolver) resolveFunc(module, name string) (interface{}, bool) {
 		return (*Runtime).syscallJsCopyBytesToGo, true
 	case "go::syscall/js.copyBytesToJS": // for go1.13
 		return (*Runtime).syscallJsCopyBytesToJS, true
+
+	case "go::runtime.resetMemoryDataView":
+		return (*Runtime).resetMemoryDataView, true
+	case "go::runtime.nanotime1":
+		return (*Runtime).nanotime1, true
+	case "go::runtime.walltime1":
+		return (*Runtime).walltime1, true
+
+	case "go::syscall/js.finalizeRef":
+		return (*Runtime).finalizeRef, true
+	case "go::syscall/js.valueDelete":
+		return (*Runtime).syscallJsValueDelete, true
 	}
 	return nil, false
 }

@@ -3,7 +3,6 @@ package js
 import (
 	"errors"
 	"fmt"
-	"math"
 )
 
 // Value is the internal representing of a js object
@@ -22,6 +21,9 @@ func (v *Value) String() string {
 func (v *Value) Name() string {
 	return v.name
 }
+func (v *Value) Ref() Ref {
+	return v.ref
+}
 
 // Bytes return ref as []byte, error will return if type of ref is not Uint8Array
 func (v *Value) Bytes() ([]byte, error) {
@@ -31,38 +33,3 @@ func (v *Value) Bytes() ([]byte, error) {
 	}
 	return slice, nil
 }
-
-// predefined values
-var (
-	valueUndefined = &Value{
-		name:  "Undefined",
-		value: "undefined",
-		ref:   0,
-	}
-	valueNaN = &Value{
-		name:  "NaN",
-		value: math.NaN(),
-		ref:   ValueNaN,
-	}
-	valueZero = &Value{
-		name:  "Zero",
-		value: 0,
-		ref:   ValueZero,
-	}
-	valueNull = &Value{
-		name:  "Null",
-		value: (*int)(nil),
-		ref:   ValueNull,
-	}
-
-	valueTrue = &Value{
-		name:  "True",
-		value: true,
-		ref:   ValueTrue,
-	}
-	valueFalse = &Value{
-		name:  "False",
-		value: false,
-		ref:   ValueFalse,
-	}
-)

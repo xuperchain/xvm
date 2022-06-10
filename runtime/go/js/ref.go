@@ -15,25 +15,49 @@ const (
 )
 
 const (
-	// ValueNaN is the ref of Nan
-	ValueNaN Ref = nanHead<<32 | iota
-	// ValueZero is the ref of number 0
-	ValueZero
-	// ValueNull is the ref of Null
-	ValueNull
-	// ValueTrue is the ref of True
-	ValueTrue
-	// ValueFalse is the ref of False
-	ValueFalse
-	// ValueGlobal is the ref of global
-	ValueGlobal
-	// ValueMemory is the ref of wasm Memory object
-	ValueMemory
-	// ValueGo is the ref of Go object
-	ValueGo
+	// the type flags need to be in sync with wasm_exec.js
+	typeFlagNone = iota
+	typeFlagObject
+	typeFlagString
+	typeFlagSymbol
+	typeFlagFunction
 )
 
-// Ref represents the unique id of a js object
+var (
+	valueUndefined = Value{ref: 0}
+	ValueNaN       = predefValue(0, typeFlagNone)
+	ValueZero      = predefValue(1, typeFlagNone)
+	ValueNull      = predefValue(2, typeFlagNone)
+	ValueTrue      = predefValue(3, typeFlagNone)
+	ValueFalse     = predefValue(4, typeFlagNone)
+	ValueGlobal    = predefValue(5, typeFlagObject)
+	ValueGo        = predefValue(6, typeFlagObject) // instance of the Go class in JavaScript
+)
+
+const (
+	// ValueNaN is the ref of Nan
+	ValueNaN2 Ref = nanHead<<32 | iota
+	// ValueZero is the ref of number 0
+	ValueZero2
+	// ValueNull is the ref of Null
+	ValueNull2
+	// ValueTrue is the ref of True
+	ValueTrue2
+	// ValueFalse is the ref of False
+	ValueFalse2
+	// ValueGlobal is the ref of global
+	ValueGlobal2
+	// ValueMemory is the ref of wasm Memory object
+	ValueMemory2
+	// ValueGo is the ref of Go object
+	ValueGo2
+)
+
+func predefValue(id uint32, typeFlag byte) *Value {
+	return &Value{ref: (nanHead|Ref(typeFlag))<<32 | Ref(id)}
+}
+
+// ref represents the unique id of a js object
 type Ref int64
 
 // Number return ref as a number, if ref not a number, false will be returned
